@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.kubg.mappers.adminMapper">
+	
+	<!-- 카테고리 호출 -->
+	<select id="category" resultType="com.mycompany.kubg.domain.CategoryVO">
+		SELECT 
+			level
+			, cateName
+			, cateCode
+			, cateCodeRef 	
+		FROM goods_category
+		START WITH cateCodeRef IS NULL 
+		CONNECT BY PRIOR cateCode = cateCodeRef
+	</select>
+	
+	<!-- 상품 등록 -->
+	<insert id="register">
+		INSERT INTO tbl_goods(
+			gdsNum
+			, gdsName
+			, cateCode
+			, gdsPrice
+			, gdsStock
+			, gdsDes
+			, gdsImg
+			, gdsThumbImg
+		) VALUES (
+			tbl_goods_seq.nextval
+			, #{gdsName}
+			, #{cateCode}
+			, #{gdsPrice}
+			, #{gdsStock}
+			, #{gdsDes}
+			, #{gdsImg}
+			, #{gdsThumbImg}
+		)
+	</insert>
+	
+	<!-- 상품 목록 -->
+	<select id="goodsList" resultType="com.mycompany.kubg.domain.GoodsVO">
+		SELECT
+			gdsNum
+			, gdsName
+			, cateCode
+			, gdsPrice
+			, gdsStock
+			, gdsDes
+			, gdsImg
+			, gdsDate
+		FROM tbl_goods
+		ORDER BY gdsNum DESC
+	</select>
+	
+	<!-- 상품 상세 -->
+	<select id="goodsView" resultType="com.mycompany.kubg.domain.GoodsViewVO">
+		<!-- SELECT
+			gdsNum
+			, gdsName
+			, cateCode
+			, gdsPrice
+			, gdsStock
+			, gdsDes
+			, gdsImg
+			, gdsDate
+		FROM tbl_goods
+		WHERE gdsNum = #{gdsNum} -->
+		SELECT
+			gdsNum
+			, gdsName
+			, g.cateCode
+			, c.cateCodeRef
+			, c.cateName
+			, gdsPrice
+			, gdsStock
+			, gdsDes
+			, gdsImg
+			, gdsThumbImg
+			, gdsDate
+		FROM tbl_goods g
+		INNER JOIN goods_category c
+		ON g.cateCode = c.cateCode
+		WHERE g.gdsNum = #{gdsNum}
+	</select>
+	
+	<!-- 상품 수정 -->
+	<update id="goodsModify">
+		UPDATE tbl_goods
+			SET
+				gdsName = #{gdsName}
+				, cateCode = #{cateCode}
+				, gdsPrice = #{gdsPrice}
+				, gdsStock = #{gdsStock}
+				, gdsDes = #{gdsDes}
+				, gdsImg = #{gdsImg}
+				, gdsThumbImg = #{gdsThumbImg}
+		WHERE gdsNum = #{gdsNum}
+	</update>
+	
+	<!-- 상품 삭제 -->
+	<delete id="goodsDelete">
+		DELETE FROM
+			tbl_goods
+		WHERE gdsNum = #{gdsNum}
+	</delete>
+	
+</mapper>
